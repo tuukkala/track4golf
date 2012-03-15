@@ -1,0 +1,32 @@
+{
+    "name": "scorecard",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "required": true
+        },
+        "date": {
+            "type": "string",
+            "description": "Date in string format dd.mm.yyyy",
+            "required": true
+        },
+        "course": {
+            "type": "string",
+            "description": "course id",
+            "required": true
+        },
+        "tee": {
+            "type": "string",
+            "description": "tee id",
+            "required": true
+        },
+        "holes": {
+            "type": "array",
+            "required": true,
+            "items": {
+                "type": "holeScore"
+            }
+        }        
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "name": "hole",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "required": true
+        },
+        "number": {
+            "type": "string",
+            "required": true
+        },
+        "par": {
+            "type": "number",
+            "required": true
+        },
+        "hcp": {
+            "type": "number",
+            "required": true
+        },
+        "lenght": {
+            "type": "number",
+            "required": true
+        }
+    }
+}

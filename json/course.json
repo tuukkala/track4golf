@@ -1,0 +1,29 @@
+{
+    "name": "course",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "required": true
+        },
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "country": {
+            "type": "string",
+            "required": true
+        },
+        "address": {
+            "type": "string",
+            "required": false
+        },
+        "tees": {
+            "type": "array",
+            "required": true,
+            "items": {
+                "type": "tee"
+            }
+        }        
+    }
+}

@@ -1,0 +1,34 @@
+{
+    "name": "holeScore",
+    "type": "object",
+    "properties": {
+        "holeid": {
+            "type": "string",
+            "required": true
+        },
+        "strokes": {
+            "type": "number",
+            "required": true
+        },
+        "puts": {
+            "type": "number",
+            "required": true
+        },
+        "fairway": {
+            "type": "boolean",
+            "required": true
+        },
+        "fairway": {
+            "type": "boolean",
+            "required": true
+        },
+        "sandtrap": {
+            "type": "boolean",
+            "required": true
+        },
+        "notes": {
+            "type": "string",
+            "required": false
+        }
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "name": "player",
+    "type": "object",
+    "description": "Player details",
+    "properties": {
+        "id": {
+            "type": "string",
+            "required": true
+        },
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "email": {
+            "type": "string",
+            "required": true
+        },
+        "handicap": {
+            "type": "number",
+            "required": true
+        }
+    }
+}
