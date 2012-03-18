@@ -3,6 +3,8 @@ folder_01.source = qml/track4golf
 folder_01.target = qml
 DEPLOYMENTFOLDERS = folder_01
 
+QT += sql
+
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
 
@@ -31,7 +33,12 @@ CONFIG += qdeclarative-boostable
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
-    src/player.cpp
+    datamodel/player.cpp \
+    datamodel/scorecard.cpp \
+    datamodel/holescore.cpp \
+    datamodel/course.cpp \
+    datamodel/tee.cpp \
+    datamodel/hole.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -47,4 +54,10 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/changelog
 
 HEADERS += \
-    src/player.h
+    datamodel/player.h \
+    datamodel/scorecard.h \
+    datamodel/holescore.h \
+    datamodel/course.h \
+    datamodel/tee.h \
+    datamodel/hole.h \
+    datamodel/storable.h

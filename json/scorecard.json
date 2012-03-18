@@ -1,4 +1,4 @@
-{
+        {
     "name": "scorecard",
     "type": "object",
     "properties": {
@@ -6,7 +6,12 @@
             "type": "string",
             "required": true
         },
-        "date": {
+        "startDate": {
+            "type": "string",
+            "description": "Date in string format dd.mm.yyyy",
+            "required": true
+        },
+        "endDate": {
             "type": "string",
             "description": "Date in string format dd.mm.yyyy",
             "required": true

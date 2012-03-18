@@ -7,10 +7,8 @@
 
 QT += declarative
 
-SOURCES += $$PWD/qmlapplicationviewer.cpp \
-    qmlapplicationviewer/player.cpp
-HEADERS += $$PWD/qmlapplicationviewer.h \
-    qmlapplicationviewer/player.h
+SOURCES += $$PWD/qmlapplicationviewer.cpp
+HEADERS += $$PWD/qmlapplicationviewer.h
 INCLUDEPATH += $$PWD
 
 # Include JS debugger library if QMLJSDEBUGGER_PATH is set
