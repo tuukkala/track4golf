@@ -31,18 +31,14 @@ void Tee::setSlope(float slope)
     mSlope = slope;
 }
 
-void Tee::serializeToSql()
+Hole* Tee::addHole()
 {
-    QSqlQuery query;
-    query.prepare("INSERT INTO hole (name, slope, courseid) "
-                  "VALUES (:name, :slope, :courseid)");
-    query.bindValue(":name", name());
-    query.bindValue(":slope", slope());
-    query.bindValue(":courseId", mCourseId);
-    query.exec();
+    Hole* hole = new Hole(this->id());
+    mHoles.append(hole);
+    return hole;
 }
 
-QString Tee::serializeToJson()
+QList<Hole*> Tee::holes()
 {
-    return "";
+    return mHoles;
 }

@@ -25,6 +25,17 @@ void ScoreCard::end()
     mFinished = true;
 }
 
+void ScoreCard::setStartDate(QDateTime date)
+{
+    mStartDate = date;
+}
+
+void ScoreCard::setEndDate(QDateTime date)
+{
+    mEndDate = date;
+    mFinished = true;
+}
+
 QDateTime ScoreCard::startDate()
 {
     return mStartDate;
@@ -52,7 +63,16 @@ Tee* ScoreCard::tee()
 void ScoreCard::setTee(Tee* tee)
 {
     mTee = tee;
+    foreach(HoleScore* hole, mHoles){
+        mHoles.append(new HoleScore(hole->number(), this));
+    }
 }
+
+QList<HoleScore*> ScoreCard::holeScores()
+{
+    return mHoles;
+}
+
 
 HoleScore* ScoreCard::nextHole()
 {
@@ -77,22 +97,23 @@ HoleScore* ScoreCard::previouseHole()
     }
     return current;
 }
-void ScoreCard::serializeToSql()
-{
-    QSqlQuery query;
-    query.prepare("INSERT INTO scorecard (startdate, enddate, finished, courseid, teeid, playerid) "
-                  "VALUES (startdate, enddate, finished, courseid, teeid, playerid)");
-    query.bindValue("startdate:", startDate());
-    query.bindValue("enddate:", endDate());
-    query.bindValue(":finished", mFinished);
-    query.bindValue(":courseId", mCourse->courseId());
-    query.bindValue(":teeid", mTee->teeId());
-    query.bindValue(":playerid", mPlayerId);
 
-    query.exec();
+HoleScore* ScoreCard::holeAt(int index)
+{
+    if(index < mHoles.size()){
+        return mHoles.at(index);
+    }
+    return 0;
 }
 
-QString ScoreCard::serializeToJson()
+void ScoreCard::finish()
 {
-    return "";
+    mFinished = true;
+    endDate() = QDateTime::currentDateTime();
 }
+bool ScoreCard::isFinished()
+{
+    return mFinished;
+}
+
+

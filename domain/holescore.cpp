@@ -4,7 +4,32 @@ HoleScore::HoleScore(int number, QObject *parent) :
     QObject(parent)
 {
     mNumber = number;
+    mSkipped = false;
+    mPlayed = false;
+    mFairway = false;
+    mSandTrap = false;
 }
+
+bool HoleScore::skipped()
+{
+    return mSkipped;
+}
+
+void HoleScore::skip(bool skip)
+{
+    mSkipped = skip;
+}
+
+bool HoleScore::played()
+{
+    return mPlayed;
+}
+
+void HoleScore::setPlayed(bool played)
+{
+    mPlayed = played;
+}
+
 
 int HoleScore::number()
 {
@@ -63,22 +88,5 @@ QString HoleScore::note()
     return mNotes;
 }
 
-void HoleScore::serializeToSql()
-{
-    QSqlQuery query;
-    query.prepare("INSERT INTO holescore (number, strokes, puts, fairway, sandtrap, notes) "
-                  "VALUES (:number, :strokes, :puts, :fairway, :sandtrap, :notes)");
-    query.bindValue(":number", number());
-    query.bindValue(":strokes", strokes());
-    query.bindValue(":puts", puts());
-    query.bindValue(":fairway", fairway());
-    query.bindValue(":sandtrap", sandtrap());
-    query.bindValue(":notes", note());
-    query.exec();
-}
 
-QString HoleScore::serializeToJson()
-{
-    return "";
-}
 

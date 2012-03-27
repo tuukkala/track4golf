@@ -2,16 +2,17 @@
 #define TEE_H
 
 #include <QObject>
+#include <QList>
 
 #include "hole.h"
-#include "storable.h"
+#include "domainbase.h"
 
-class Tee : public QObject, public Storable
+class Tee : public QObject, public DomainBase
 {
     Q_OBJECT
-    Q_INTERFACES(Storable)
 
 public:
+
     ~Tee();
 
     Q_INVOKABLE QString name();
@@ -20,10 +21,9 @@ public:
     Q_INVOKABLE float slope();
     Q_INVOKABLE void setSlope(float slope);
 
-    int teeId() {return mRowId;}
+    Q_INVOKABLE Hole* addHole();
 
-    void serializeToSql();
-    QString serializeToJson();
+    Q_INVOKABLE QList<Hole*> holes();
 
 private:
     explicit Tee(int courseId, QObject *parent = 0);

@@ -42,24 +42,24 @@ void Course::setAddress(QString address)
 
 Tee* Course::addTee()
 {
-    return new Tee(mRowId, this);
+    Tee* tee = new Tee(this->id(), this);
+    mTees.append(tee);
+    return tee;
 }
 
-void Course::serializeToSql()
+Tee* Course::tee(int id)
 {
-    QSqlQuery query;
-    query.prepare("INSERT INTO course (name, country, address) "
-                  "VALUES (:name, :country, :address)");
-    query.bindValue(":name", name());
-    query.bindValue(":country", country());
-    query.bindValue(":address", address());
-    query.exec();
-    foreach(Tee* tee, mTees){
-        tee->serializeToSql();
+    Tee* tee = 0;
+    foreach(Tee* aTee, mTees){
+        if(aTee->id() == id){
+            tee = aTee;
+            break;
+        }
     }
+    return tee;
 }
 
-QString Course::serializeToJson()
+QList<Tee*> Course::tees()
 {
-    return "";
+    return mTees;
 }

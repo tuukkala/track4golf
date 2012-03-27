@@ -33,12 +33,13 @@ CONFIG += qdeclarative-boostable
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
-    datamodel/player.cpp \
-    datamodel/scorecard.cpp \
-    datamodel/holescore.cpp \
-    datamodel/course.cpp \
-    datamodel/tee.cpp \
-    datamodel/hole.cpp
+    domain/player.cpp \
+    domain/scorecard.cpp \
+    domain/holescore.cpp \
+    domain/course.cpp \
+    domain/tee.cpp \
+    domain/hole.cpp \
+    domain/dbmanager.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -54,10 +55,11 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/changelog
 
 HEADERS += \
-    datamodel/player.h \
-    datamodel/scorecard.h \
-    datamodel/holescore.h \
-    datamodel/course.h \
-    datamodel/tee.h \
-    datamodel/hole.h \
-    datamodel/storable.h
+    domain/player.h \
+    domain/scorecard.h \
+    domain/holescore.h \
+    domain/course.h \
+    domain/tee.h \
+    domain/hole.h \
+    domain/dbmanager.h \
+    domain/domainbase.h

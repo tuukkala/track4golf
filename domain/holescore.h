@@ -2,12 +2,11 @@
 #define HOLESCORE_H
 
 #include <QObject>
-#include "storable.h"
+#include "domainbase.h"
 
-class HoleScore : public QObject, public Storable
+class HoleScore : public QObject,  public DomainBase
 {
-    Q_OBJECT
-    Q_INTERFACES(Storable)
+    Q_OBJECT    
 
 public:
     explicit HoleScore(int number, QObject *parent = 0);
@@ -30,9 +29,11 @@ public:
     Q_INVOKABLE void setNote(QString note);
     Q_INVOKABLE QString note();
 
-    void serializeToSql();
-    QString serializeToJson();
+    Q_INVOKABLE bool skipped();
+    Q_INVOKABLE void skip(bool skip);
 
+    Q_INVOKABLE bool played();
+    Q_INVOKABLE void setPlayed(bool played);
 
 private:
     int mNumber;
@@ -40,6 +41,8 @@ private:
     int mPuts;
     bool mFairway;
     bool mSandTrap;
+    bool mSkipped;
+    bool mPlayed;
     QString mNotes;
     
 };

@@ -47,25 +47,8 @@ ScoreCard* Player::newRound()
 {
     //TODO: maybe not delete brutally
     if(mCurrentRound){ delete mCurrentRound;}
-    mCurrentRound = new ScoreCard(mRowId, this);
+    mCurrentRound = new ScoreCard(this->id(), this);
     return mCurrentRound;
 }
 
-void Player::serializeToSql()
-{
-    QSqlQuery query;
-    query.prepare("INSERT INTO player (username, password, name, email, hcp) "
-                  "VALUES (username, password, name, email, hcp)");
-    query.bindValue("username:", mUserName);
-    query.bindValue("password:", mPassWord);
-    query.bindValue("name:", name());
-    query.bindValue(":email", email());
-    query.bindValue(":hcp", hcp());
 
-    query.exec();
-}
-
-QString Player::serializeToJson()
-{
-    return "";
-}

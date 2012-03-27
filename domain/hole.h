@@ -3,12 +3,11 @@
 
 #include <QObject>
 
-#include "storable.h"
+#include "domainbase.h"
 
-class Hole : public QObject, public Storable
+class Hole : public QObject, public DomainBase
 {
-    Q_OBJECT
-    Q_INTERFACES(Storable)
+    Q_OBJECT    
 
 public:    
     
@@ -24,9 +23,6 @@ public:
     int length();
     void setLength(int length);
 
-    void serializeToSql();
-    QString serializeToJson();
-
 private:
     explicit Hole(int teeId, QObject *parent = 0);
 
@@ -37,6 +33,7 @@ private:
     int mHcp;
     int mLength;
     int mTeeId;
+    friend class Tee;
 };
 
 #endif // HOLE_H

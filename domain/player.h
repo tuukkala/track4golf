@@ -2,13 +2,12 @@
 #define PLAYER_H
 
 #include <QObject>
-#include "storable.h"
+#include "domainbase.h"
 #include "scorecard.h"
 
-class Player : public QObject, public Storable
+class Player : public QObject, public DomainBase
 {
-    Q_OBJECT
-    Q_INTERFACES(Storable)
+    Q_OBJECT    
 
 public:
     explicit Player(QString userName, QString password, QObject *parent = 0);
@@ -26,8 +25,8 @@ public:
 
     ScoreCard* newRound();
 
-    void serializeToSql();
-    QString serializeToJson();
+    QString username() { return mUserName; }
+    QString password() { return mPassWord; }
 
 private:
     QString mName;

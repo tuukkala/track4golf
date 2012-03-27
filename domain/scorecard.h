@@ -7,12 +7,11 @@
 
 #include "holescore.h"
 #include "course.h"
-#include "storable.h"
+#include "domainbase.h"
 
-class ScoreCard : public QObject, public Storable
+class ScoreCard : public QObject, public DomainBase
 {
-    Q_OBJECT
-    Q_INTERFACES(Storable)
+    Q_OBJECT    
 
 public:    
     ~ScoreCard();
@@ -23,6 +22,9 @@ public:
     Q_INVOKABLE QDateTime startDate();
     Q_INVOKABLE QDateTime endDate();
 
+    Q_INVOKABLE void setStartDate(QDateTime date);
+    Q_INVOKABLE void setEndDate(QDateTime date);
+
     Q_INVOKABLE void setCourse(Course* course);
     Q_INVOKABLE Course* course();
 
@@ -31,9 +33,11 @@ public:
 
     Q_INVOKABLE HoleScore* nextHole();
     Q_INVOKABLE HoleScore* previouseHole();
+    Q_INVOKABLE HoleScore* holeAt(int index);
+    QList<HoleScore*> holeScores();
 
-    void serializeToSql();
-    QString serializeToJson();
+    Q_INVOKABLE void finish();
+    Q_INVOKABLE bool isFinished();
 
 private:
     explicit ScoreCard(int playerId, QObject *parent = 0);
