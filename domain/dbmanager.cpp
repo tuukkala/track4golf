@@ -1,51 +1,180 @@
 #include <QDir>
+#include <QFile>
+#include <QDebug>
+#include <QSqlError>
 
 #include "dbmanager.h"
 
 DbManager::DbManager(QObject *parent) :
     QObject(parent)
-{
+{        
 }
 
-DbManager::~DbManager(){}
+DbManager::~DbManager()
+{
+    mDataBase.close();
+}
 
-bool DbManager::openDataBase()
+bool DbManager::deleteDataBase()
+{
+    if(mDataBase.isOpen()){
+        mDataBase.close();
+    }
+    if(QFile::exists(mDbPath)){
+        QFile::remove(mDbPath);
+    }
+}
+
+void DbManager::printError(QSqlQuery query)
+{
+    qDebug() << query.lastError().text();
+}
+void DbManager::printError()
+{
+    qDebug() << mDataBase.lastError().text();
+}
+
+bool DbManager::openDataBase(QString dbPath, QString name)
 {
     mDataBase = QSqlDatabase::addDatabase("QSQLITE");
-    QString path("/home/user/MyDocs");
-    path.append(QDir::separator()).append("track4golf.db.sqlite");
-    path = QDir::toNativeSeparators(path);
-    mDataBase.setDatabaseName(path);
-
+    mDbPath = dbPath;
+    mDbPath.append(QDir::separator()).append(name);
+    mDbPath = QDir::toNativeSeparators(mDbPath);
+    mDataBase.setDatabaseName(mDbPath);
     // Open databasee
-    return mDataBase.open();
+    qDebug() << "Open database";
+    bool ret = mDataBase.open();
+    if(ret && mDataBase.tables().count() != 6){
+        qDebug() << "Database open, initialize.";
+        ret = initializeDataBase();
+    }
+    if(!ret){
+        printError();
+    }
+    return ret;
 }
 
 bool DbManager::initializeDataBase()
 {
-    return false;
+    qDebug() << "create player";
+    bool ret = createTablePlayer();
+    if(ret){
+        qDebug() << "create player ok, make course";
+        ret = createTableCourse();
+        qDebug() << "course of make scorecard.";
+        ret = createTableScoreCard();
+    }
+    return ret;
 }
+bool DbManager::createTablePlayer()
+{
+    QSqlQuery query;
+    bool ret = query.exec("create table player("
+                     "id integer primary key, "
+                     "username varchar(100), "
+                     "password varchar(50), "
+                     "name varchar(100), "
+                     "email varchar(100), "
+                     "hcp real)");    
+    if(!ret){
+        printError(query);
+    }
+    return ret;
+}
+
+
+bool DbManager::createTableCourse()
+{
+    QSqlQuery query;
+    bool ret = query.exec("create table course ("
+                     "id integer primary key, "
+                     "name varchar(100), "
+                     "country varchar(100), "
+                     "address varchar(100))");    
+    if(ret){
+        ret = query.exec("create table tee ("
+                         "id integer primary key, "
+                         "name varchar(100), "
+                         "slope real, "
+                         "courseid integer, "
+                         "FOREIGN KEY(courseid) REFERENCES course(id) )");
+        if(ret){
+            ret = query.exec("create table hole ("
+                             "id integer primary key, "
+                             "number integer, "
+                             "par integer, "
+                             "hcp integer, "
+                             "length integer, "
+                             "teeid integer, "
+                             "FOREIGN KEY(teeid) REFERENCES tee(id) )");
+
+        }
+    }
+    if(!ret){
+        printError(query);
+    }
+    return ret;
+}
+
+bool DbManager::createTableScoreCard()
+{
+    QSqlQuery query;
+    bool ret = query.exec("create table scorecard ("
+                          "id integer primary key, "
+                          "startdate integer, "
+                          "enddate integer, "
+                          "courseid integer, "
+                          "teeid integer, "
+                          "FOREIGN KEY(courseid) REFERENCES course(id) "
+                          "FOREIGN KEY(teeid) REFERENCES tee(id) )");
+
+    if(ret){
+        ret = query.exec("create table holescore ("
+                         "id integer primary key, "
+                         "number integer, "
+                         "strokes integer, "
+                         "puts integer, "
+                         "fairway integer, "
+                         "sandtrap integer, "
+                         "skipped integer, "
+                         "played integer, "
+                         "note varchar(256), "
+                         "scorecardid integer, "
+                         "FOREIGN KEY(scorecardid) REFERENCES scorecard(id) )");
+    }
+
+    if(!ret){
+        printError(query);
+    }
+    return ret;
+}
+
 
 Player* DbManager::loadPlayer(const QString& username, const QString& password)
 {
     QSqlQuery query;
-    query.prepare("SELECT id, username, password, name, email, hcp from player where username: username ");
+    query.prepare("SELECT id, username, password, name, email, hcp from player where username= :username");
     query.bindValue(":username", username);
     Player* player = 0;
-    if(query.exec()){
-        if (query.next() &&  query.value(2).toString() != password){
-            player = new Player(query.value(1).toString(), query.value(2).toString());
-            player->setName(query.value(3).toString());
-            player->setEmail(query.value(4).toString());
-            player->setHcp(query.value(5).toFloat());
+    if(query.exec()){        
+        if (query.next()){
+            if(query.value(2).toString() == password){
+                player = new Player(query.value(1).toString(), query.value(2).toString());
+                player->setName(query.value(3).toString());
+                player->setEmail(query.value(4).toString());
+                player->setHcp(query.value(5).toFloat());
+            }
        }
+    }
+    else{
+        printError(query);
     }
     return player;
 }
 
-bool DbManager::createPlayer(Player* player)
+bool DbManager::savePlayer(Player* player)
 {
-    QSqlQuery query;
+    QSqlQuery query(mDataBase);
     query.prepare("INSERT INTO player (username, password, name, email, hcp) "
                   "VALUES (:username, :password, :name, :email, :hcp)");
     query.bindValue(":username", player->username());
@@ -58,10 +187,13 @@ bool DbManager::createPlayer(Player* player)
     if(ret){
         player->setId(query.lastInsertId().toInt());
     }
+    else{
+        printError(query);
+    }
     return ret;
 }
 
-bool DbManager::savePlayer(Player* player)
+bool DbManager::updatePlayer(Player* player)
 {
     QSqlQuery query;
     query.prepare("UPDATE player set username = :username, password = :password, name = :name, email = :email, hcp = :hcp"
@@ -74,7 +206,11 @@ bool DbManager::savePlayer(Player* player)
     query.bindValue(":email", player->email());
     query.bindValue(":hcp", player->hcp());
 
-    return query.exec();
+    bool ret = query.exec();
+    if(!ret){
+        printError(query);
+    }
+    return ret;
 }
 
 bool DbManager::deletePlayer(Player* player)
@@ -82,7 +218,11 @@ bool DbManager::deletePlayer(Player* player)
     QSqlQuery query;
     query.prepare("DELETE from player WHERE id=:id");
     query.bindValue(":id", player->id());
-    return query.exec();
+    bool ret = query.exec();
+    if(!ret){
+        printError(query);
+    }
+    return ret;
 }
 
 Course* DbManager::loadCourse(int id)
@@ -121,14 +261,23 @@ Course* DbManager::loadCourse(int id)
                         hole->setLength(holeQuery.value(4).toInt());
                     }
                 }
-            }
+                else{
+                    printError(holeQuery);
+                }
+            }            
         }
+        else{
+            printError(teeQuery);
+        }
+    }
+    else{
+        printError();
     }
     return course;
 }
 
 
-bool DbManager::createCourse(Course* course)
+bool DbManager::saveCourse(Course* course)
 {
     mDataBase.transaction();
     bool needRollBack = false;
@@ -149,6 +298,7 @@ bool DbManager::createCourse(Course* course)
             if(!teeQuery.exec()){
                 teeQuery.finish();
                 needRollBack = true;
+                printError(teeQuery);
                 break;
             }
             tee->setId(teeQuery.lastInsertId().toInt());
@@ -161,9 +311,10 @@ bool DbManager::createCourse(Course* course)
                 holeQuery.bindValue(":hcp", hole->hcp());
                 holeQuery.bindValue(":lenght", hole->length());
                 holeQuery.bindValue(":teeid", tee->id());
-                if(holeQuery.exec()){
+                if(!holeQuery.exec()){
                     holeQuery.finish();
                     needRollBack = true;
+                    printError(holeQuery);
                     break;
                 }
                 hole->setId(holeQuery.lastInsertId().toInt());
@@ -173,13 +324,14 @@ bool DbManager::createCourse(Course* course)
         }
     }
     if(needRollBack){
+        printError(query);
         mDataBase.rollback();
         return false;
     }
     return true;
 }
 
-bool DbManager::saveCourse(Course* course)
+bool DbManager::updateCourse(Course* course)
 {
     mDataBase.transaction();
     bool needRollBack = false;
@@ -199,6 +351,7 @@ bool DbManager::saveCourse(Course* course)
             if(!teeQuery.exec()){
                 teeQuery.finish();
                 needRollBack = true;
+                printError(teeQuery);
                 break;
             }
             tee->setId(teeQuery.lastInsertId().toInt());
@@ -214,6 +367,7 @@ bool DbManager::saveCourse(Course* course)
                 if(holeQuery.exec()){
                     holeQuery.finish();
                     needRollBack = true;
+                    printError(holeQuery);
                     break;
                 }
                 hole->setId(holeQuery.lastInsertId().toInt());
@@ -223,6 +377,7 @@ bool DbManager::saveCourse(Course* course)
         }
     }
     if(needRollBack){
+        printError(query);
         mDataBase.rollback();
         return false;
     }
@@ -241,6 +396,7 @@ bool DbManager::deleteCourse(Course* course)
         holeQuery.bindValue(":teeid", tee->id());
         if(!holeQuery.exec()){
             needRollBack = true;
+            printError(holeQuery);
             break;
         }
     }
@@ -250,6 +406,7 @@ bool DbManager::deleteCourse(Course* course)
          teeQuery.bindValue(":id", course->id());
          if(!teeQuery.exec()){
             needRollBack = true;
+            printError(teeQuery);
          }
          else{
              QSqlQuery query;
@@ -257,10 +414,12 @@ bool DbManager::deleteCourse(Course* course)
              query.bindValue(":id", course->id());
              if(!query.exec()){
                 needRollBack = true;
+                printError(query);
              }
          }
     }
     if(needRollBack){
+        printError();
         mDataBase.rollback();
         return false;
     }
@@ -301,7 +460,13 @@ ScoreCard* DbManager::loadScoreCard(Player* player, int id)
                     score->setNote(holeQuery.value(5).toString());
                 }
             }
-        }        
+        }
+        else{
+            printError(holeQuery);
+        }
+    }
+    else{
+        printError(query);
     }
     return scoreCard;
 }
@@ -331,8 +496,14 @@ ScoreCard* DbManager::createScoreCard(Player* player, Course* course, Tee* tee)
             if(holeQuery.exec()){
                 score->setId(holeQuery.lastInsertId().toInt());
             }
+            else{
+                printError(holeQuery);
+            }
         }
-    }   
+    }
+    else{
+        printError(query);
+    }
     return scoreCard;
 }
 
@@ -360,11 +531,13 @@ bool DbManager::saveScoreCard(ScoreCard* scoreCard)
             holeQuery.bindValue(":note", score->note());
             if(!holeQuery.exec()){
                 needRollBack = true;
+                printError(holeQuery);
                 break;
             }
         }
     }
-    if(needRollBack){
+    if(needRollBack){        
+        printError(query);
         mDataBase.rollback();
         return false;
     }
@@ -385,10 +558,12 @@ bool DbManager::deleteScoreCard(ScoreCard* scoreCard)
          query.bindValue(":id", scoreCard->id());
          if(!query.exec()){
             needRollBack = true;
+            printError(query);
          }
     }
 
-    if(needRollBack){
+    if(needRollBack){        
+        printError(holeQuery);
         mDataBase.rollback();
         return false;
     }

@@ -28,18 +28,12 @@ symbian:TARGET.CAPABILITY += NetworkServices
 # Speed up launching on MeeGo/Harmattan when using applauncherd daemon
 CONFIG += qdeclarative-boostable
 
+include(domain/domain.pri)
+
+SOURCES += main.cpp
+
 # Add dependency to Symbian components
 # CONFIG += qt-components
-
-# The .cpp file which was generated for your project. Feel free to hack it.
-SOURCES += main.cpp \
-    domain/player.cpp \
-    domain/scorecard.cpp \
-    domain/holescore.cpp \
-    domain/course.cpp \
-    domain/tee.cpp \
-    domain/hole.cpp \
-    domain/dbmanager.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -54,12 +48,4 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/compat \
     qtc_packaging/debian_harmattan/changelog
 
-HEADERS += \
-    domain/player.h \
-    domain/scorecard.h \
-    domain/holescore.h \
-    domain/course.h \
-    domain/tee.h \
-    domain/hole.h \
-    domain/dbmanager.h \
-    domain/domainbase.h
+
